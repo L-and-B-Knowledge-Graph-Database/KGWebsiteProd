@@ -1,0 +1,49 @@
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Donors Knowledge Graph</title>
+    </style>
+    <script src="https://cdn.neo4jlabs.com/neovis.js/v1.5.0/neovis.js"></script>
+  </head>
+
+  <body >
+    <div class="banner-wrapper" role="banner" aria-label="Page banner" style="background-color:#00274C;margin-bottom:10px;padding:20px;">
+      <div class="um-canvas-login-banner" style="width:100%;max-width:1320px;margin:0 auto 0 auto;padding:0;">
+        {% load static %}
+        <img src="{% static "um-logo-white.png" %}" alt="University of Michigan" style="display: block; margin-left: auto; margin-right: auto;width: 50%;">
+      </div>
+    </div>
+    <button onClick="draw()">try!</button>
+    <div id="viz"></div>
+  </body>
+
+  <script>
+    function draw() {
+        var config = {
+            container_id: "viz",
+            server_url: "neo4j://45fbc634.databases.neo4j.io",
+            server_user: "neo4j",
+            server_password: "BcW9ECss4d1xqgpUErbSAr32D5chvZTr9onX3JOxaR0",
+            labels: {
+                "Interest": {
+                  caption: "Name"
+                },
+                "Donor": {
+                  caption: "abr"
+                }
+            },
+            relationships: {
+                "CLICKED": {
+                  caption: "count",
+                  thickness: "count"
+                }
+            },
+            initial_cypher: "MATCH (a:Donor)-[c:CLICKED]-(b:Interest) WHERE c.count >= 4 RETURN a, c, b"
+        }
+        var viz = new NeoVis.default(config);
+        viz.render();
+    }
+  </script>
+
+</html>
