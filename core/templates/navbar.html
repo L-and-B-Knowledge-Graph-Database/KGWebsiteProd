@@ -4,7 +4,6 @@
     .navbar.navbar-expand-lg {
         background-color : #00274C;
         font-family: 'Roboto', sans-serif;
-        height:70px;
     }
     .navbar.navbar-expand-lg .navbar-nav {
         list-style: none;
@@ -16,19 +15,47 @@
         margin-left: 0;
         margin-bottom: 0;
     }
+
+    .nav-link {
+      display: inline-block;
+      position: relative;
+      color: #FFCB05;
+    }
+
+    .nav-link:hover {
+      text-decoration: none;
+    }
+
+    .nav-link:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      transform: scaleX(0);
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background-color: #FFCB05;
+      transform-origin: bottom right;
+      transition: transform 0.25s ease-out;
+    }
+
+    .nav-link:hover:after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
 </style>
 
-<nav class="navbar navbar-expand-lg" id="myNav" >
+<nav class="navbar navbar-expand-lg" id="myNav">
     <img src="{% static "VPComm_Logo_header.png" %}" style="padding-left:1rem;">
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="/query/" style="color:white; font-size: 25px; ">Query</a>
+          <a class="nav-link" href="/query/" style="color:white; font-size: 20px; ">Query</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/manage/" style="color:white; font-size: 25px;">Manage</a>
+          <a class="nav-link" href="/manage/" style="color:white; font-size: 20px;">Manage</a>
         </li>
-      </ul>
+        </ul>
     </div>
 </nav>
 <!-- navbar -->

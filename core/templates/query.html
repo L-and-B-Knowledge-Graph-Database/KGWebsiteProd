@@ -6,21 +6,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Donors Knowledge Graph</title>
-
+    <title>Knowledge Graph</title>
+    <link rel="icon" type="image/png" href="{% static "tabIcon.png" %}" >
     <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static "chosen/docsupport/style.css" %}">
     <link rel="stylesheet" href="{% static "chosen/docsupport/prism.css" %}">
     <link rel="stylesheet" href="{% static "chosen/chosen.css" %}">
-    
-    <script src="https://cdn.neo4jlabs.com/neovis.js/v1.5.0/neovis.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <style>
+
+      ul li {
+        list-style-type: none;
+        margin-left: 0%;
+        margin-top: 1.5%;
+        margin-bottom: 1.5%;
+      }
 
       .bodyWrapper {
         width: 100%;
@@ -29,6 +30,10 @@
         padding:50px;
         border-style: solid;
         border-color: #FFCB05;
+      }
+
+      div.side-by-side {
+        margin-bottom: 0;
       }
 
       .graphWrapper {
@@ -43,28 +48,47 @@
       .graphWrapper .graphContainer{
         height: 812px;
         border-style: solid;
-        border-color: #FFCB05;
+        border-color: #00274C;
         background-color:white;
         border-width: 2px;
       }
+
+      .btn-outline-primary {
+        --bs-btn-hover-bg: #00274C;
+        border-color: #00274C; 
+        color: #00274C;
+      }
+
+      .btn-outline-primary:hover {
+        border-color: #FFCB05; 
+      }
+      
       div.side-by-side > div {
         padding:0%;
         width: 30%;
       }
+
+      .mySmallButton {
+        background-color:white;
+        border-width:1px; 
+        border-color: #00274C; 
+        border-radius: 5px;
+      }
+
+      .mySmallButton:hover {
+        background-color:#FFCB05;
+        color:white;
+      }
+
     </style>
   </head>
 
-  <body onload="loadInterests()" style="font-family: 'Roboto', sans-serif;">
+  <body onload="load_donors_and_interests()" style="font-family: 'Roboto', sans-serif; background: #EEE;">
 
     {% include 'navbar.html' %}
 
     <div class="bodyWrapper" id="main">
-      <!-- searchbar -->
-      <div class="input-group">
-        <input id="cypherCommand" type="search" class="form-control rounded" placeholder="Enter Cypher Command" aria-label="Search" aria-describedby="search-addon" />
-      </div>
-      <!-- searchbar -->
-      <h2><a name="optgroup-support" class="anchor" href="#optgroup-support" >Query Engine</a></h2>
+      <h2 class="mine"><a name="optgroup-support" class="anchor" href="#optgroup-support" >Query Engine</a></h2>
       <div class="input-group mb-3" id="firstRow">
         <div class="input-group-prepend">
           <span class="input-group-text" id="inputGroup-sizing-default"  style="background-color: #00274C; color: white; border-color: #FFCB05; border-width:2px;">Donor IDs</span>
@@ -74,30 +98,33 @@
       <div class="side-by-side clearfix" style="width:50%">
         <div>
           <em>Donor Version</em>
-          <select data-placeholder="Choose Donor Versions" class="chosen-select" multiple tabindex="6" style="width:85%;" id="donor_versions">
-            <option value=""></option>
-            <option>Annual</option>
-            <option>Major</option>
+          <select data-placeholder="Choose Donor Versions" class="chosen-single-no-single" style="width:85%;" id="donor_versions">
+            <option value="Both">Both</option>
+            <option value="Annual">Annual</option>
+            <option value="Major">Major</option>
           </select>
         </div>
         <div>
           <em>Click Count</em>
-          <select  class="chosen-select" style="width:3rem;" id="click_compare">
-            <option value=""></option>
-            <option>></option>
-            <option selected>=</option>
-            <option><</option>
+          <select  class="chosen-single-no-single" style="width:3rem;" id="click_compare" >
+            <option  value=">">></option>
+            <option  value="=" selected>=</option>
+            <option  value="<"><</option>
           </select>
           <input placeholder="Choose Click Count" style="font-size:small; height: 30px;" id="click_count"></input>
         </div>
         <div>
-          <em>Interest Labels</em>
-          <select data-placeholder="Choose Interest Labels" class="chosen-select" id="interests" multiple tabindex="6" style="padding:0;">
+          <em>Interest Labels</em> 
+          <select data-placeholder="Choose Interest Labels" class="chosen-select" id="interests" multiple style="padding:0;">
             <option value=""></option>
           </select>
+          <div class="side-by-side clearfix">
+            <button class="mySmallButton" onClick="fill_interests()" >all</button>
+            <button class="mySmallButton" onClick="clear_interests()" >clear</button>
+          </div>
         </div>
       </div>
-      <button type="button" class="btn btn-outline-primary" onclick="draw(cypherCommand.value)" style="border-color: #00274C; color: #00274C;">Go!</button>
+      <button type="button" class="btn btn-outline-primary" onclick="draw()">Go!</button>
     </div>
     <hr style="height:2px;border-width:0;color:gray;background-color:gray">
 
@@ -105,6 +132,19 @@
       <div class="graphContainer" id="viz"></div>
     </div>
 
+
+    <div class="input-group" style="margin : 0 0 3em 3em; padding : 0;">
+      <button type="button" class="btn btn-outline-primary" onclick="export_query()">Export</button>
+      <input type="text" value="Cypher Command" id="copy-input" style="width : 89%;"/>
+      <span class="input-group-btn">
+        <input type="image" src="{% static "clipboardLogo.png" %}"  height="45" width="45" onClick="copyCypherCommand()"/> 
+      </span>
+    </div>
+
+    <script src="https://cdn.neo4jlabs.com/neovis.js/v1.5.0/neovis.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src= "{% static "chosen/docsupport/jquery-3.2.1.min.js" %}" type="text/javascript"></script>
     <script src="{% static "chosen/chosen.jquery.js" %}" type="text/javascript"></script>
     <script src= "{% static "chosen/docsupport/prism.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -114,20 +154,50 @@
   
   <script>
 
-    async function get_query_inputs() {
-      var donor_ids = document.getElementById("uniqueBar");
-      var donor_versions = document.getElementById("donor_versions");
-      var click_compare = document.getElementById("click_compare");
-      var click_count = document.getElementById("click_count");
-      var interests = document.getElementById("interests");
-      console.log(donor_ids.value)
-      console.log(donor_versions)
-      console.log(click_compare.value)
-      console.log(click_count.value)
-      console.log(interests.value)
+    async function export_query() {
+      command = document.getElementById("copy-input").value;
+      location.href = `/query/export?command=${JSON.stringify(command)}`;
     }
 
-    async function loadInterests() {
+    function clear_interests() {
+      $("#interests").val('').trigger("chosen:updated");
+    }
+
+    async function fill_interests() {
+      $('#interests option').prop('selected', true).trigger('chosen:updated');
+    }
+
+    function copyCypherCommand() {
+      /* Get the text field */
+      var copyText = document.getElementById("copy-input");
+
+      /* Select the text field */
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+      /* Copy the text inside the text field */
+      navigator.clipboard.writeText(copyText.value);
+    }
+
+    async function get_query_inputs() {
+      var queryParams = {
+        "donor_ids" : document.getElementById("uniqueBar").value,
+        "donor_versions" : document.getElementById("donor_versions").value,
+        "click_compare" : document.getElementById("click_compare").value,
+        "click_count" : document.getElementById("click_count").value,
+        "interests" : $("#interests").chosen().val()
+      };
+      var cypherCommand;
+      await $.getJSON(`/create/cypher?params=${JSON.stringify(queryParams)}`, function( data ) {
+        cypherCommand = data['command'];
+      });
+      return cypherCommand;
+    }
+
+    async function load_donors_and_interests() {
+      
+      $("#click_compare").chosen({"disable_search": true});
+      $("#donor_versions").chosen({"disable_search": true});
 
       var host = document.getElementById("interests");
 
@@ -138,6 +208,7 @@
           group.setAttribute("label", category);
           for (var i = 0; i < data[key].length; ++i) {
             var thisOption = document.createElement("option");
+            thisOption.setAttribute("Value", data[key][i])
             thisOption.append(data[key][i])
             group.append(thisOption)
           }
@@ -145,29 +216,32 @@
         });
       });
 
-      $("#interests").trigger("chosen:updated");
+      $(".chosen-select").trigger("chosen:updated");
     }
 
-    function get_cypher_result(command) {
-      fetch("[host]/cypher/" + command + "/", {method:"GET"}) 
-      .then((data)=>{ 
-      console.log(data.text) ;
-    })
-    }
+    async function draw() {
 
-    function tester() {
-      var input = document.createElement("input");
-      var host = document.getElementById("main");
-      host.appendChild(input)
-    }
+      var queryParams = {
+        "donor_ids" : document.getElementById("uniqueBar").value,
+        "donor_versions" : document.getElementById("donor_versions").value,
+        "click_compare" : document.getElementById("click_compare").value,
+        "click_count" : document.getElementById("click_count").value,
+        "interests" : $("#interests").chosen().val()
+      };
+      var cypherCommand;
+      await $.getJSON(`/create/cypher?params=${JSON.stringify(queryParams)}`, function( data ) {
+        cypherCommand = data['command'];
+      });
 
-    function draw(myCommand) {
+      //$("copy-input").val(cypherCommand);
+      $('#copy-input').attr('value', cypherCommand)
 
       var config = {
         container_id: "viz",
-        server_url: "neo4j://45fbc634.databases.neo4j.io",
-        server_user: "neo4j",
-        server_password: "BcW9ECss4d1xqgpUErbSAr32D5chvZTr9onX3JOxaR0",
+        server_url: "{{ uri }}",
+        server_user: "{{ user }}",
+        server_password: "{{ password }}",
+        
         labels: {
             "Interest": {
               caption: "Name"
@@ -179,10 +253,11 @@
         relationships: {
             "CLICKED": {
               caption: "count",
-              thickness: "count"
+              thickness: "count",
+              color: "black"
             }
         },
-        initial_cypher: myCommand
+        initial_cypher: cypherCommand
       }
 
       var viz = new NeoVis.default(config);

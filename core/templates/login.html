@@ -1,0 +1,87 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Knowledge Graph</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <style>
+            .btn.btn-primary {
+                background:white;
+                border-color: #00274C; 
+                color: #00274C;
+                margin: 1rem;
+            }
+
+            .btn.btn-primary:hover {
+                background:#FFCB05;
+                color:white;
+            }
+        </style>
+    </head>
+
+    <body style="font-family: 'Roboto', sans-serif; background-color: #00274C; position: relative;">
+        <center id="login" style="padding:10rem;">
+            <div class="container">
+                <div id="login-row" class="row justify-content-center align-items-center">
+
+                    <div id="login-column" class="col-md-6">
+                        <h1 style="color:white; padding:2rem;">Login</h1>
+
+                        <div id="login-box" class="col-md-12">
+                            <form id="login-form" class="form" action="" method="post">
+                                <div class="form-group">
+                                    <label for="uri" class="text-info">Uri</label><br>
+                                    <input type="text" name="uri" id="uri" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="username" class="text-info">Username</label><br>
+                                    <input type="text" name="username" id="username" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="password" class="text-info">Password</label><br>
+                                    <input type="text" name="password" id="password" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <button id='submitButton' class="btn btn-primary" type="button" onClick="login()">
+                                        Submit
+                                        <span id='submitSpinner' class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </center>
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+    </body>
+
+    <script>
+        async function login() {
+            thisButton = document.getElementById("submitButton");
+            spinner = document.getElementById("submitSpinner");
+            thisButton.disabled = true;
+            spinner.hidden = false;
+            var neo4jParams = {
+                "uri" : document.getElementById("uri").value,
+                "username" : document.getElementById("username").value,
+                "password" : document.getElementById("password").value
+            };
+            await $.getJSON(`set?params=${JSON.stringify(neo4jParams)}`);
+            await $.getJSON('load/');
+            thisButton.disabled = false;
+            spinner.hidden = true;
+            location.href = 'query/';
+        }
+    </script>
+</html>

@@ -1,13 +1,14 @@
+from io import StringIO
+import core.drivers.config as c
 import pandas as pd
+import requests
 import json
 import os
 
+""" The Load and Write sections are just for the json files in the master folder """
 
 ### LOAD
 def general_load(filePath):
-    # File path has to point towards static
-    cwd = os.getcwd()
-    filePath = cwd + '/core/static/' + filePath
     with open(filePath) as json_file:
         if os.stat(filePath).st_size == 0:
             return {}
@@ -15,42 +16,39 @@ def general_load(filePath):
             return json.load(json_file)
 
 def load_Donors():
-    return general_load('master/Donors.json')
+    return general_load('core/drivers/master/Donors.json')
 
 def load_Interests():
-    return general_load('master/Interests.json')
+    return general_load('core/drivers/master/Interests.json')
 
 def load_Links():
-    return general_load('master/Links.json')
+    return general_load('core/drivers/master/Links.json')
+### LOAD
 
 
 ### WRITE
 def general_write(filePath, object):
-    # File path has to point towards static
-    cwd = os.getcwd()
-    filePath = cwd + '/core/static/' + filePath
     with open(filePath, 'w') as outFile:
         json.dump(object, outFile, indent=4)
 
 def write_Donors(Donors):
-    general_write('master/Donors.json', Donors)
+    general_write('core/drivers/master/Donors.json', Donors)
 
 def write_Interests(Interests):
-    general_write('master/Interests.json', Interests)
+    general_write('core/drivers/master/Interests.json', Interests)
 
 def write_Links(Links):
-    general_write('master/Links.json', Links)
+    general_write('core/drivers/master/Links.json', Links)
+### WRITE
 
 
-### CREATE
-def create_Donors(data):
+def create_Donors(data, Donors):
 
-    Donors = load_Donors()
-    uniqueIDs = data.Lookup_ID.unique()
+    uniqueIDs = data['Lookup ID'].unique()
 
     for ID in uniqueIDs:
-        ID = str(ID)
-        if ID not in Donors:
+        ID = str(ID).split('.')[0]
+        if ID.isnumeric() and ID not in Donors:
             Donors[ID] = {}
             Donors[ID]['clicks'] = {}
             Donors[ID]['links'] = {}
@@ -58,9 +56,12 @@ def create_Donors(data):
     # Count interests for Donor per click
     for i in range(len(data.index)):
 
-        thisDonorID = str(data.iloc[i].Lookup_ID)
-        thisLink = data.iloc[i].link
-        thisTimeStamp = data.iloc[i].timestamp
+        thisDonorID = str(data.at[i, 'Lookup ID']).split('.')[0]
+        if not thisDonorID.isnumeric(): # incase there are test IDS such as nan
+            continue
+
+        thisLink = data.at[i, ' link']
+        thisTimeStamp = data.at[i, ' timestamp']
         newRow = False
 
         if thisLink not in Donors[thisDonorID]['links']:
@@ -88,12 +89,10 @@ def create_Donors(data):
         if 'version' not in Donors[thisDonorID]: # wonder if there's a way to not check this so often
             Donors[thisDonorID]['version'] = data.iloc[i].Version
 
-    write_Donors(Donors)
+    return Donors
 
 
-def create_Interests(data):
-
-    Interests = load_Interests()
+def create_Interests(data, Interests):
 
     for label in data.columns[4:]: # who knows if that 4 will always remain const
 
@@ -106,16 +105,14 @@ def create_Interests(data):
         elif Interest not in Interests[category]:
             Interests[category].append(Interest)
 
-    write_Interests(Interests)
+    return Interests
 
 
-def create_Links(data):
-
-    Links = load_Links()
+def create_Links(data, Links):
 
     for i in range(len(data.index)):
 
-        thisLink = data.iloc[i].link
+        thisLink = data.at[i, ' link']
 
         if thisLink not in Links:
 
@@ -132,16 +129,53 @@ def create_Links(data):
                     else:
                         Links[thisLink][category].append(Interest)
 
+    return Links
+
+
+def compile_data(allData):
+
+    Interests = {}
+    Donors = {}
+    Links = {}
+
+    for data in allData:
+        
+        Interests = create_Interests(data, Interests)
+        Donors = create_Donors(data, Donors)
+        Links = create_Links(data, Links)
+
+    return Donors, Interests,  Links
+
+
+def fetch_data():
+
+    list_file_url = f"https://www.googleapis.com/drive/v3/files?q=%27{c.folder_id}%27+in+parents&key={c.API_key}"
+    file_list = requests.get(list_file_url).json()
+
+    allData = []
+
+    for file in file_list['files']:
+        file_id = file['id']
+        download_file_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        file_text = requests.get(download_file_url).text
+        csv_raw = StringIO(file_text)
+        data = pd.read_csv(csv_raw)
+        allData.append(data)
+
+    return allData
+
+
+def fetch_donors_and_interests_from_drive():
+
+    allData = fetch_data()
+    Donors, Interests, Links = compile_data(allData)
+    return Donors, Interests, Links
+
+
+def update_master():
+
+    Donors, Interests, Links = fetch_donors_and_interests_from_drive()
+
+    write_Donors(Donors)
+    write_Interests(Interests)
     write_Links(Links)
-
-
-### etc
-
-def fresh_start():
-    cwd = os.getcwd()
-    directory = cwd + '\\data'
-    for filename in os.listdir(directory):
-        data = pd.read_csv('data/' + filename)
-        create_Interests(data)
-        create_Links(data)
-        create_Donors(data)

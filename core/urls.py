@@ -19,10 +19,20 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('', views.login_page),
+    path('set/', views.set_neo4j_params),
     path('query/', views.query_engine),
+    path('query/export/', views.get_file),
     path('manage/', views.database_manager),
+    path('manage/test/', views.test_database),
+    path('manage/update/', views.update_database),
+    path('manage/clear/', views.clear_database),
+    path('load/', views.load_donors_and_interests),
+    path('manage/load/', views.load_donors_and_interests),
+    path('docs/', views.docs_page),
+    path('stats/', views.stats_page),
     path('interests/', views.get_Interests),
-    path('donors/<str:donor_id>/', views.get_donor),
+    path('create/cypher/', views.make_cypher_command),
     path('cypher/<str:command>/', views.run_command),
     path('admin/', admin.site.urls)
 ]
