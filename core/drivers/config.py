@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Google Drive
 folder_id = '1FGByz6-c0bEyD5XK0P7U2SKOvFeZfZkh'
-API_key = 'AIzaSyA0emjqkzZnWTy95IeAKJj4RUZfIt0d218'
+API_key = 'AIzaSyBOKPcqNE9SQSVIW5aZyRzkoEPFczn3azs'
 
 # Neo4j - Only used in the playground jupyter notebook
 uri = 'neo4j+s://45fbc634.databases.neo4j.io'
