@@ -1,3 +1,4 @@
-uri = 'neo4j+s://45fbc634.databases.neo4j.io'
+DEMO INSTANCE
+uri = 'neo4j+s://5782ea63.databases.neo4j.io'
 user = 'neo4j'
-password = 'BcW9ECss4d1xqgpUErbSAr32D5chvZTr9onX3JOxaR0'
+password = 'oTaRG6aJPKlIisN8zKE3uTy8r3aOha2z60r2jBCeWoc'

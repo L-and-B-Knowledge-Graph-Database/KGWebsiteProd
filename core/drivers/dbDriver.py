@@ -82,10 +82,9 @@ class App:
             if badInterests:
                 self.run(f"MATCH (b) WHERE ID(b) IN {badInterests} DETACH DELETE b")
 
-            for category in Interests:
-                for Interest in justInterests:
-                    if Interest not in resultInterests:
-                        session.run(f"CREATE (:Interest {{Name: '{Interest}', Type:'{category}'}})")
+            for Interest in justInterests:
+                if Interest not in resultInterests:
+                    session.run(f"CREATE (:Interest {{Name: '{Interest}'}})")
 
 
     def create_click_edges(self, Donors):
@@ -116,26 +115,32 @@ class App:
                         badEdges.append(edge['c'].id)
 
             if badEdges:
-                print(badEdges)
                 self.run(f"MATCH (:Donor)-[c:CLICKED]->(:Interest) WHERE ID(c) IN {badEdges} DELETE c")
             
             for donor_id in justClicks:
                 for Interest in justClicks[donor_id]:
 
-                    if donor_id not in resultEdges or Interest not in resultEdges[donor_id]:
+                    if donor_id not in resultEdges:
                         # Create new edge
-                        print('create', donor_id, Interest, justClicks[donor_id][Interest])
                         command = (
                             "MATCH (a:Donor), (b:Interest) "
                             f"WHERE a.ID = {int(donor_id)} AND b.Name = '{Interest}'"
                             f"CREATE (a)-[r:CLICKED {{count: {justClicks[donor_id][Interest]}}}]->(b) "
                         )
                         session.run(command)
-
+                    elif Interest not in resultEdges[donor_id]:
+                        # Create new edge
+                        command = (
+                            "MATCH (a:Donor), (b:Interest) "
+                            f"WHERE a.ID = {int(donor_id)} AND b.Name = '{Interest}'"
+                            f"CREATE (a)-[r:CLICKED {{count: {justClicks[donor_id][Interest]}}}]->(b) "
+                        )
+                        session.run(command)
                     elif justClicks[donor_id][Interest] != resultEdges[donor_id][Interest]:
-                        print('set', donor_id, Interest, justClicks[donor_id][Interest])
                         command = (
                                 f"MATCH (:Donor {{ID: {donor_id}}})-[b:CLICKED]-(:Interest {{Name: '{Interest}'}}) "
                                 f"SET b.count = {justClicks[donor_id][Interest]} "
                             )
                         session.run(command)
+                    else:
+                        print('Shouldnt happen')
